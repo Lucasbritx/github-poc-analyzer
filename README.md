@@ -68,6 +68,12 @@ npm run build
 4. Deterministic scoring evaluates presentation, completeness, technical signal, and freshness.
 5. Codex SDK runs locally through the `codex` CLI to produce the final report.
 
+## Screenshots
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+
 ## Notes
 
 - Private repositories are out of scope for v1.
