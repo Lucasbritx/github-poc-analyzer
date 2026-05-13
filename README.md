@@ -71,9 +71,17 @@ npm run build
 6. The dashboard can generate next-PoC project briefs from the user's learning goals and current repo gaps.
 
 ## Screenshots
-![alt text](image.png)
+
+Dashboard:
+![Dashboard](image.png)
+
+Selected POC view(without Codex analysis):
 ![alt text](image-1.png)
+
+Selected POC view(after Codex analysis):
 ![alt text](image-2.png)
+
+Codex analysis:
 ![alt text](image-3.png)
 
 ### Pocs suggestion feature
