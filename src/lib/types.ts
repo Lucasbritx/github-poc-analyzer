@@ -53,6 +53,42 @@ export type AnalysisReport = {
 
 export type AnalysisStatus = "idle" | "running" | "completed" | "failed";
 
+export type RecommendationRequest = {
+  learningGoals: string;
+  targetAudience: string | null;
+  preferredStack: string | null;
+  difficulty: string | null;
+  timeBudget: string | null;
+};
+
+export type PortfolioSignals = {
+  languages: string[];
+  topics: string[];
+  missingDemoRepos: string[];
+  weakReadmeRepos: string[];
+  lowTestSignalRepos: string[];
+  staleRepos: string[];
+  repeatedProjectSignals: string[];
+  existingStrengths: string[];
+  portfolioGaps: string[];
+};
+
+export type PocRecommendation = {
+  id?: number;
+  title: string;
+  resume: string;
+  whyThisFits: string;
+  suggestedStack: string[];
+  mvpScope: string[];
+  portfolioValue: string;
+  difficulty: string;
+  estimatedTime: string;
+  nextSteps: string[];
+  relatedGaps: string[];
+  relatedRepoIds: number[];
+  createdAt?: string;
+};
+
 export type RepoRecord = RepoSnapshot & {
   dbId: number;
   analysisStatus: AnalysisStatus;

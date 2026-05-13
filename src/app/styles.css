@@ -30,7 +30,9 @@ a {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -53,6 +55,8 @@ input {
 .signal-panel,
 .toolbar,
 .empty-state,
+.recommendation-form,
+.recommendation-empty,
 .panel,
 .metric,
 .score-tile,
@@ -238,6 +242,11 @@ input {
 .toolbar p,
 .empty-state h2,
 .empty-state p,
+.recommendation-panel h2,
+.recommendation-panel p,
+.recommendation-card h3,
+.recommendation-card h4,
+.recommendation-card p,
 .panel h2,
 .panel ul,
 .repo-card h2,
@@ -248,6 +257,9 @@ input {
 
 .toolbar p,
 .repo-card__description,
+.recommendation-panel__intro p,
+.recommendation-card__resume,
+.recommendation-empty p,
 .empty-state p,
 .detail-hero p,
 .score-tile p {
@@ -278,6 +290,145 @@ input {
 .repo-card:hover {
   transform: translateY(-2px);
   border-color: var(--accent);
+}
+
+.recommendation-panel {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.recommendation-panel__intro {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.recommendation-panel__intro h2 {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.05;
+}
+
+.recommendation-panel__intro p {
+  max-width: 760px;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.recommendation-form {
+  box-shadow: none;
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+
+.recommendation-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.recommendation-form input,
+.recommendation-form select,
+.recommendation-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  color: var(--text);
+  font-weight: 500;
+  padding: 12px 14px;
+}
+
+.recommendation-form textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+
+.recommendation-form input:focus,
+.recommendation-form select:focus,
+.recommendation-form textarea:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(15, 123, 99, 0.16);
+}
+
+.recommendation-form__grid,
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.recommendation-grid {
+  align-items: start;
+}
+
+.recommendation-card {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 22px;
+}
+
+.recommendation-card h3 {
+  margin-top: 4px;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.recommendation-card__resume {
+  margin-top: 10px;
+  line-height: 1.55;
+}
+
+.recommendation-card details {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.recommendation-card summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-strong);
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+}
+
+.recommendation-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.recommendation-card__details {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.recommendation-card h4 {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.recommendation-card ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.recommendation-empty {
+  box-shadow: none;
+  padding: 28px;
+}
+
+.recommendation-empty p {
+  margin-top: 8px;
 }
 
 .repo-card__top {
@@ -429,7 +580,9 @@ input {
 
   .hero,
   .detail-hero,
-  .report {
+  .report,
+  .recommendation-form__grid,
+  .recommendation-grid {
     grid-template-columns: 1fr;
   }
 

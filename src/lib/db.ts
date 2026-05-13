@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-import type { AnalysisReport, AnalysisStatus, RepoRecord, RepoSnapshot } from "./types";
+import type { AnalysisReport, AnalysisStatus, PocRecommendation, RecommendationRequest, RepoRecord, RepoSnapshot } from "./types";
 
 const dataDir = path.join(process.cwd(), "data");
 const dbPath = path.join(dataDir, "app.sqlite");
@@ -64,6 +64,40 @@ function getDb() {
         synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(user_id, github_id)
       );
+
+      CREATE TABLE IF NOT EXISTS recommendation_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        learning_goals TEXT NOT NULL,
+        target_audience TEXT,
+        preferred_stack TEXT,
+        difficulty TEXT,
+        time_budget TEXT,
+        status TEXT NOT NULL DEFAULT 'completed',
+        error TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS recommendations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        request_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        resume TEXT NOT NULL,
+        why_this_fits TEXT NOT NULL,
+        suggested_stack_json TEXT NOT NULL,
+        mvp_scope_json TEXT NOT NULL,
+        portfolio_value TEXT NOT NULL,
+        difficulty TEXT NOT NULL,
+        estimated_time TEXT NOT NULL,
+        next_steps_json TEXT NOT NULL,
+        related_gaps_json TEXT NOT NULL,
+        related_repo_ids_json TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(request_id) REFERENCES recommendation_requests(id) ON DELETE CASCADE,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
     `);
   }
 
@@ -105,6 +139,22 @@ type RepoRow = {
   analysis_error: string | null;
   analysis_json: string | null;
   analyzed_at: string | null;
+};
+
+type RecommendationRow = {
+  id: number;
+  title: string;
+  resume: string;
+  why_this_fits: string;
+  suggested_stack_json: string;
+  mvp_scope_json: string;
+  portfolio_value: string;
+  difficulty: string;
+  estimated_time: string;
+  next_steps_json: string;
+  related_gaps_json: string;
+  related_repo_ids_json: string;
+  created_at: string;
 };
 
 export function upsertUser(profile: {
@@ -217,6 +267,13 @@ export function listPocRepos(userId: number) {
   return rows.map(mapRepoRow);
 }
 
+export function listUserRepos(userId: number) {
+  const rows = getDb()
+    .prepare("SELECT * FROM repos WHERE user_id = ? ORDER BY is_poc DESC, updated_at DESC")
+    .all(userId) as RepoRow[];
+  return rows.map(mapRepoRow);
+}
+
 export function getRepo(userId: number, repoId: number) {
   const row = getDb().prepare("SELECT * FROM repos WHERE user_id = ? AND id = ?").get(userId, repoId) as RepoRow | undefined;
   return row ? mapRepoRow(row) : null;
@@ -247,6 +304,68 @@ export function saveAnalysisError(repoId: number, message: string) {
     .run(message, repoId);
 }
 
+export function saveRecommendations(userId: number, request: RecommendationRequest, recommendations: PocRecommendation[]) {
+  const database = getDb();
+  database.exec("BEGIN");
+  try {
+    const result = database
+      .prepare(`
+        INSERT INTO recommendation_requests (
+          user_id, learning_goals, target_audience, preferred_stack, difficulty, time_budget
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+      `)
+      .run(
+        userId,
+        request.learningGoals,
+        request.targetAudience,
+        request.preferredStack,
+        request.difficulty,
+        request.timeBudget
+      );
+
+    const requestId = Number(result.lastInsertRowid);
+    const insert = database.prepare(`
+      INSERT INTO recommendations (
+        request_id, user_id, title, resume, why_this_fits, suggested_stack_json,
+        mvp_scope_json, portfolio_value, difficulty, estimated_time, next_steps_json,
+        related_gaps_json, related_repo_ids_json
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    for (const recommendation of recommendations) {
+      insert.run(
+        requestId,
+        userId,
+        recommendation.title,
+        recommendation.resume,
+        recommendation.whyThisFits,
+        JSON.stringify(recommendation.suggestedStack),
+        JSON.stringify(recommendation.mvpScope),
+        recommendation.portfolioValue,
+        recommendation.difficulty,
+        recommendation.estimatedTime,
+        JSON.stringify(recommendation.nextSteps),
+        JSON.stringify(recommendation.relatedGaps),
+        JSON.stringify(recommendation.relatedRepoIds)
+      );
+    }
+
+    database.exec("COMMIT");
+  } catch (error) {
+    database.exec("ROLLBACK");
+    throw error;
+  }
+}
+
+export function listRecommendations(userId: number) {
+  const rows = getDb()
+    .prepare("SELECT * FROM recommendations WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT 12")
+    .all(userId) as RecommendationRow[];
+  return rows.map(mapRecommendationRow);
+}
+
 function mapRepoRow(row: RepoRow): RepoRecord {
   return {
     dbId: row.id,
@@ -274,5 +393,23 @@ function mapRepoRow(row: RepoRow): RepoRecord {
     analysisError: row.analysis_error,
     analysis: row.analysis_json ? JSON.parse(row.analysis_json) : null,
     analyzedAt: row.analyzed_at
+  };
+}
+
+function mapRecommendationRow(row: RecommendationRow): PocRecommendation {
+  return {
+    id: row.id,
+    title: row.title,
+    resume: row.resume,
+    whyThisFits: row.why_this_fits,
+    suggestedStack: JSON.parse(row.suggested_stack_json),
+    mvpScope: JSON.parse(row.mvp_scope_json),
+    portfolioValue: row.portfolio_value,
+    difficulty: row.difficulty,
+    estimatedTime: row.estimated_time,
+    nextSteps: JSON.parse(row.next_steps_json),
+    relatedGaps: JSON.parse(row.related_gaps_json),
+    relatedRepoIds: JSON.parse(row.related_repo_ids_json),
+    createdAt: row.created_at
   };
 }
