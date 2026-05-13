@@ -42,6 +42,7 @@ function optionalString(value: FormDataEntryValue | null) {
 function redirectToDashboard(error?: string) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const url = new URL("/dashboard", appUrl);
+  url.searchParams.set("tab", "suggestions");
   if (error) url.searchParams.set("recommendationError", error);
   return NextResponse.redirect(url);
 }
