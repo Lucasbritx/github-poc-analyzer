@@ -10,6 +10,7 @@ The app can verify a user through GitHub OAuth, or search a public username for 
 - Username search test mode for public profile/repo checks.
 - Automatic PoC detection from repository names, descriptions, topics, and README content.
 - Hybrid scoring: deterministic repository signals plus Codex-generated written feedback.
+- Hybrid next-PoC recommendations from user learning goals plus existing portfolio signals.
 - Local SQLite persistence through Node's built-in `node:sqlite`.
 - Dashboard and per-repository report views.
 
@@ -67,12 +68,21 @@ npm run build
 3. PoC detection flags likely prototypes, demos, MVPs, experiments, or proof-of-concept projects.
 4. Deterministic scoring evaluates presentation, completeness, technical signal, and freshness.
 5. Codex SDK runs locally through the `codex` CLI to produce the final report.
+6. The dashboard can generate next-PoC project briefs from the user's learning goals and current repo gaps.
 
 ## Screenshots
 ![alt text](image.png)
 ![alt text](image-1.png)
 ![alt text](image-2.png)
 ![alt text](image-3.png)
+
+### Pocs suggestion feature
+Pocs suggestion request:
+![Pocs suggestion request](image-4.png)
+Suggestions:
+![Suggestions](image-5.png)
+Project brief example:
+![Project brief example](image-6.png)
 
 ## Notes
 
